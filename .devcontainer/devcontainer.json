@@ -1,37 +1,23 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
-// https://github.com/microsoft/vscode-dev-containers/tree/v0.205.2/containers/kubernetes-helm-minikube
 {
-	"name": "Kubernetes - Minikube-in-Docker",
-	"dockerFile": "Dockerfile",
-	"runArgs": ["--privileged"],
-	"mounts": [
-		"source=minikube-var-lib-docker,target=/var/lib/docker,type=volume",
-		"source=minikube-config,target=/home/vscode/.minikube,type=volume",
-	],
-	"overrideCommand": false,
-
-	// Set *default* container specific settings.json values on container create.
-	"settings": {},
-
-	// Add the IDs of extensions you want installed when the container is created.
-	"extensions": [
-		"ms-azuretools.vscode-docker",
-		"ms-kubernetes-tools.vscode-kubernetes-tools"
-	],
-
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [],
-
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "kubectl version",
-
-	// Use 'postStartCommand' to run commands after the container is created like starting minikube.
-	"postStartCommand": "minikube start --kubernetes-version=v1.21.6",
-
-	// Minikube does not like running as root, so use a non-root user.
-	"remoteUser": "vscode",
-	"features": {
-		"terraform": "latest",
-		"golang": "latest"
-	}
+  "name": "terraform-kubernetes-postgres-operator",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "workspace",
+  "workspaceFolder": "/workspace",
+  // Set *default* container specific settings.json values on container create.
+  "settings": {
+    "vs-kubernetes": {
+      "vs-kubernetes.kubeconfig": "/workspace/.devcontainer/kubeconfig.yaml",
+      "checkForMinikubeUpgrade": false,
+    }
+  },
+  // Add the IDs of extensions you want installed when the container is created.
+  "extensions": [
+    "ms-azuretools.vscode-docker",
+    "ms-kubernetes-tools.vscode-kubernetes-tools",
+    "hashicorp.terraform",
+    "earthly.earthfile-syntax-highlighting",
+  ],
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [],
+  "postStartCommand": "sed -i 's#server: https://127.0.0.1:6443#server: https://k3s-server:6443#' .devcontainer/kubeconfig.yaml",
 }
