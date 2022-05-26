@@ -17,6 +17,7 @@ MINIKUBE_VERSION="${3:-"none"}" # latest is also valid
 KUBECTL_SHA256="${4:-"automatic"}"
 HELM_SHA256="${5:-"automatic"}"
 MINIKUBE_SHA256="${6:-"automatic"}"
+USERNAME=${7:-"automatic"}
 
 HELM_GPG_KEYS_URI="https://raw.githubusercontent.com/helm/helm/main/KEYS"
 GPG_KEY_SERVERS="keyserver hkp://keyserver.ubuntu.com:80
@@ -27,6 +28,29 @@ if [ "$(id -u)" -ne 0 ]; then
     echo -e 'Script must be run as root. Use sudo, su, or add "USER root" to your Dockerfile before running this script.'
     exit 1
 fi
+
+# Determine the appropriate non-root user
+if [ "${USERNAME}" = "auto" ] || [ "${USERNAME}" = "automatic" ]; then
+    USERNAME=""
+    POSSIBLE_USERS=("vscode" "node" "codespace" "$(awk -v val=1000 -F ":" '$3==val{print $1}' /etc/passwd)")
+    for CURRENT_USER in ${POSSIBLE_USERS[@]}; do
+        if id -u ${CURRENT_USER} > /dev/null 2>&1; then
+            USERNAME=${CURRENT_USER}
+            break
+        fi
+    done
+    if [ "${USERNAME}" = "" ]; then
+        USERNAME=root
+    fi
+elif [ "${USERNAME}" = "none" ] || ! id -u ${USERNAME} > /dev/null 2>&1; then
+    USERNAME=root
+fi
+
+USERHOME="/home/$USERNAME"
+if [ "$USERNAME" = "root" ]; then
+    USERHOME="/root"
+fi
+
 
 # Get central common setting
 get_common_setting() {
@@ -140,8 +164,11 @@ fi
 kubectl completion bash > /etc/bash_completion.d/kubectl
 
 # kubectl zsh completion
-mkdir -p /home/${USERNAME}/.oh-my-zsh/completions
-kubectl completion zsh > /home/${USERNAME}/.oh-my-zsh/completions/_kubectl
+if [ -e "${USERHOME}}/.oh-my-zsh" ]; then
+    mkdir -p "${USERHOME}/.oh-my-zsh/completions"
+    kubectl completion zsh > "${USERHOME}/.oh-my-zsh/completions/_kubectl"
+    chown -R "${USERNAME}" "${USERHOME}/.oh-my-zsh"
+fi
 
 # Install Helm, verify signature and checksum
 echo "Downloading Helm..."
@@ -209,6 +236,10 @@ if [ "${MINIKUBE_VERSION}" != "none" ]; then
         echo '(!) minikube installation failed!'
         exit 1
     fi
+    # Create minkube folder with correct privs in case a volume is mounted here
+    mkdir -p "${USERHOME}/.minikube"
+    chown -R $USERNAME "${USERHOME}/.minikube"
+    chmod -R u+wrx "${USERHOME}/.minikube"
 fi
 
 if ! type docker > /dev/null 2>&1; then
