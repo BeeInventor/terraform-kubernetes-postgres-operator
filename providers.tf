@@ -1,6 +1,5 @@
 terraform {
   required_version = "~> 1.0"
-
   required_providers {
     kubernetes = {
       source = "hashicorp/kubernetes"
@@ -11,8 +10,4 @@ terraform {
       version = "~> 2.5"
     }
   }
-}
-
-module "postgres-operator" {
-  source = "../.."
 }

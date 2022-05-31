@@ -7,8 +7,8 @@ services:
     environment:
       # used by kubectl
       - KUBECONFIG=/workspace/.devcontainer/kubeconfig.yaml
-      # used by the Terraform provider kbst/kustomization
-      - KUBECONFIG_PATH=/workspace/.devcontainer/kubeconfig.yaml
+      # used by the Terraform provider hashicorp/helm
+      - KUBE_CONFIG_PATH=/workspace/.devcontainer/kubeconfig.yaml
       - EARTHLY_BUILDKIT_HOST=tcp://earthly:8372
       - EARTHLY_REMOTE_CACHE=ghcr.io/beeinventor/terraform_kubernetes_postgres_operator_cache:master
     volumes:

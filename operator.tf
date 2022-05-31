@@ -1,25 +1,19 @@
-data "kustomization_build" "postgres_operator" {
-  path = "${path.module}/submodules/postgres-operator/kustomize/install"
+module "crds" {
+  source = "./crds"
 }
 
-resource "kustomization_resource" "postgres_operator_p0" {
-  for_each = data.kustomization_build.postgres_operator.ids_prio[0]
+resource "helm_release" "main" {
+  # repository = 
+  namespace  = var.namespace
+  name       = var.name
+  chart      = "${path.module}/submodules/postgres-operator/helm/install"
+  values = [
+    yamlencode(var.values),
+  ]
 
-  manifest = data.kustomization_build.postgres_operator.manifests[each.value]
-}
+  skip_crds = true
 
-resource "kustomization_resource" "postgres_operator_p1" {
-  for_each = data.kustomization_build.postgres_operator.ids_prio[1]
-
-  manifest = data.kustomization_build.postgres_operator.manifests[each.value]
-
-  depends_on = [kustomization_resource.postgres_operator_p0]
-}
-
-resource "kustomization_resource" "postgres_operator_p2" {
-  for_each = data.kustomization_build.postgres_operator.ids_prio[2]
-
-  manifest = data.kustomization_build.postgres_operator.manifests[each.value]
-
-  depends_on = [kustomization_resource.postgres_operator_p1]
+  depends_on = [
+    module.crds
+  ]
 }
