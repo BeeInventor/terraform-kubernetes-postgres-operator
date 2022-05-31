@@ -9,6 +9,7 @@ devcontainer-library-scripts:
 
 devcontainer:
     FROM DOCKERFILE .devcontainer
+    SAVE IMAGE --cache-hint
 
 test:
     FROM +devcontainer

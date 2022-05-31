@@ -10,6 +10,7 @@ services:
       # used by the Terraform provider kbst/kustomization
       - KUBECONFIG_PATH=/workspace/.devcontainer/kubeconfig.yaml
       - EARTHLY_BUILDKIT_HOST=tcp://earthly:8372
+      - EARTHLY_REMOTE_CACHE=ghcr.io/beeinventor/terraform_kubernetes_postgres_operator_cache:master
     volumes:
       - ..:/workspace:cached
       - /var/run/docker.sock:/var/run/docker-host.sock

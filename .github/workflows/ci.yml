@@ -1,0 +1,35 @@
+name: CI
+on: ["push", "pull_request"]
+
+env:
+  FORCE_COLOR: 1
+  EARTHLY_STRICT: "true"
+  PUSH: "${{ github.repository_owner == 'BeeInventor' && github.event_name == 'push' }}"
+
+jobs:
+  job:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Login to GitHub Container Registry
+        if: success() && env.PUSH == 'true'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Specify Earthly remote cache
+        run: echo "EARTHLY_REMOTE_CACHE=ghcr.io/beeinventor/terraform_kubernetes_postgres_operator_cache:$(echo "$GITHUB_REF_NAME" | sed 's/[^A-Za-z0-9\-\.]/_/g')" >> $GITHUB_ENV
+      - uses: earthly/actions-setup@v1
+        with:
+          version: "v0.6.14"
+      - name: Build devcontainer
+        run: earthly +devcontainer
+        env:
+          EARTHLY_PUSH: ${{ env.PUSH }}
+      - name: Test
+        run: earthly -P +test
