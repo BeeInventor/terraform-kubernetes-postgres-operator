@@ -61,3 +61,7 @@ RUN curl -fsSL -o terraform-ls.zip https://github.com/hashicorp/terraform-ls/rel
 RUN echo 'complete -C terraform terraform' >> /home/$USERNAME/.bashrc \
     && echo 'source <(kubectl completion bash)' >> /home/$USERNAME/.bashrc \
     && echo 'source <(helm completion bash)' >> /home/$USERNAME/.bashrc
+
+# Config direnv
+COPY --chown=$USER_UID:$USER_GID ./direnv.toml /home/$USERNAME/.config/direnv/config.toml
+RUN echo 'eval "$(direnv hook bash)"' >> /home/$USERNAME/.bashrc
