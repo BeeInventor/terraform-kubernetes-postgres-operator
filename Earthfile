@@ -27,19 +27,22 @@ devcontainer:
     SAVE IMAGE --cache-hint
 
 test:
+    BUILD +test-basic
+
+test-basic:
     FROM +devcontainer
     WORKDIR /workspace
     COPY *.tf .
     COPY crds crds
     COPY submodules submodules
     WORKDIR /workspace/examples/basic
-    COPY examples/basic/main.tf .
+    COPY examples/basic/*.tf .
     COPY .devcontainer/docker-compose.yml .
     RUN terraform init
     ENV KUBECONFIG=kubeconfig.yaml
     ENV KUBE_CONFIG_PATH=kubeconfig.yaml
-    WITH DOCKER --allow-privileged --compose docker-compose.yml \
-        --service k3s-server \
-        --service k3s-agent
-        RUN while ! kubectl get --raw='/readyz'; do sleep 1; done; terraform apply -auto-approve
+    WITH DOCKER --allow-privileged --compose docker-compose.yml --service k3s-server
+        RUN while ! kubectl get --raw='/readyz'; do sleep 1; done; \
+            terraform apply -auto-approve -target module.postgres-operator \
+            && terraform apply -auto-approve
     END

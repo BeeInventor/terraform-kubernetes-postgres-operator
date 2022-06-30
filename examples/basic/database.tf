@@ -11,6 +11,10 @@ locals {
   }
 }
 
+# Note that we have to create `module.postgres-operator` first:
+# `terraform apply -target module.postgres-operator`
+# P.S. `depends_on` is not sufficient.
+# See https://github.com/hashicorp/terraform-provider-kubernetes/issues/1367
 resource "kubernetes_manifest" "database" {
   depends_on = [
     module.postgres-operator
