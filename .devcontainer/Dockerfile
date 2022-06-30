@@ -38,6 +38,18 @@ RUN apt-get update \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
+# Install psql
+RUN curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg >/dev/null \
+    && echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update \
+    && apt-get -yqq install --no-install-recommends \
+        postgresql-client-13 \
+    #
+    # Clean up
+    && apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install earthly
 RUN curl -fsSL https://github.com/earthly/earthly/releases/download/v0.6.14/earthly-linux-${TARGETARCH} -o /usr/local/bin/earthly \
     && chmod +x /usr/local/bin/earthly
