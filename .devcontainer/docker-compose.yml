@@ -20,7 +20,7 @@ services:
   # https://github.com/k3s-io/k3s/blob/release-1.21/docker-compose.yml
   k3s-server:
     hostname: k3s-server
-    image: rancher/k3s:v1.21.12-k3s1
+    image: rancher/k3s:v1.21.14-k3s1
     command: server
     tmpfs:
       - /run
@@ -43,22 +43,6 @@ services:
       - 6443:6443 # Kubernetes API Server
       - 80:80 # Ingress controller port 80
       - 443:443 # Ingress controller port 443
-  k3s-agent:
-    hostname: k3s-agent
-    image: rancher/k3s:v1.21.12-k3s1
-    tmpfs:
-      - /run
-      - /var/run
-    ulimits:
-      nproc: 65535
-      nofile:
-        soft: 65535
-        hard: 65535
-    privileged: true
-    restart: always
-    environment:
-      - K3S_URL=https://k3s-server:6443
-      - K3S_TOKEN=terraform-kubernetes-postgres-operator
 
   # https://docs.earthly.dev/ci-integration/remote-buildkit
   earthly:
