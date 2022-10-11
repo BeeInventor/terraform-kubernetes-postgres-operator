@@ -58,12 +58,12 @@ RUN earthly bootstrap --no-buildkit --with-autocomplete
 # Install tfenv
 RUN git clone --depth 1 https://github.com/tfutils/tfenv.git /tfenv \
     && ln -s /tfenv/bin/* /usr/local/bin
-ARG TERRAFORM_VERSION=1.2.1
+ARG TERRAFORM_VERSION=1.3.2
 RUN tfenv install "$TERRAFORM_VERSION"
 RUN tfenv use "$TERRAFORM_VERSION"
 
 # Install Terraform Language Server
-ARG TERRAFORM_LS_VERSION=0.27.0
+ARG TERRAFORM_LS_VERSION=0.29.2
 RUN curl -fsSL -o terraform-ls.zip https://github.com/hashicorp/terraform-ls/releases/download/v${TERRAFORM_LS_VERSION}/terraform-ls_${TERRAFORM_LS_VERSION}_linux_${TARGETARCH}.zip \
     && unzip -qq terraform-ls.zip \
     && mv ./terraform-ls /usr/local/bin/ \
